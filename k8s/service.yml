@@ -10,6 +10,6 @@ spec:
     app: frontend
   ports:
     - protocol: TCP
-      port: 80          # Ingress가 연결할 포트 (ClusterIP의 외부 포트)
+      port: 80          
       targetPort: 80    # Deployment의 containerPort
-  type: ClusterIP
+  type: LoadBalancer
