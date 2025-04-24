@@ -42,12 +42,12 @@ jobs:
 
       - name: ✏️ Update deployment.yml image tag
         run: |
-          sed -i "s|image: .*|image: joon97/ticket-front:${SHORT_SHA}|" frontend/k8s/deployment.yml
+          sed -i "s|image: .*|image: joon97/ticket-front:${SHORT_SHA}|" k8s/deployment.yml
 
       - name: 📤 Commit and Push updated deployment
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add frontend/k8s/deployment.yml
+          git add k8s/deployment.yml
           git commit -m "ci: update image tag to ${SHORT_SHA}" || echo "No changes to commit"
           git push origin main
