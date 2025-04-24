@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../apis/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 function SignupPage() {
@@ -14,7 +14,7 @@ function SignupPage() {
 
         try {
             // 1. 회원가입 요청
-            const response = await axios.post("http://localhost:8080/api/auth/signup", {
+            const response = await axiosInstance.post("/auth/signup", {
                 email,
                 password,
             });

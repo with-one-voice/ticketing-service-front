@@ -1,7 +1,7 @@
 // /api/users/login에서 userId를 넘겨주지 않아서 localStorage에 저장 불가능 -> api/users/{userId} 조회 불가능 : Undefined
 
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../apis/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
@@ -15,7 +15,7 @@ function LoginPage() {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", {
+      const response = await axiosInstance.post("/auth/login", {
         email,
         password,
       });
