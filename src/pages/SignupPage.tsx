@@ -20,7 +20,7 @@ function SignupPage() {
             });
 
             // 2. 회원가입 성공 → 로그인 요청
-            const loginResponse = await axios.post("http://localhost:8080/api/auth/login", {
+            const loginResponse = await axiosInstance.post("http://localhost:8080/api/auth/login", {
                 email,
                 password,
             });
