@@ -10,7 +10,7 @@ on:
       - 'public/**'
       - 'package.json'
       - '.github/workflows/deploy-frontend.yml'
-
+      - 'nginx.conf'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
