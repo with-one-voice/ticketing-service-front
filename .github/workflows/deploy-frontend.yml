@@ -28,7 +28,6 @@ jobs:
       - name: 📦 Install & Build React App
         run: |
           npm ci
-          npm run build
           CI=false npm run build
 
       - name: 🐳 Build & Push Docker Image
