@@ -1,5 +1,4 @@
-# .github/workflows/deploy-frontend.yml
-name: Build & Push Frontend Image
+name: Build & Deploy Frontend with Auto Sync
 
 on:
   push:
@@ -13,7 +12,7 @@ on:
       - '.github/workflows/deploy-frontend.yml'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,13 +24,30 @@ jobs:
         with:
           node-version: '18'
 
-      - name: 📦 Install & Build React App
+      - name: 🧪 Install & Build React App
         run: |
           npm ci
           CI=false npm run build
 
+      - name: 🔖 Set Git SHA tag
+        id: vars
+        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+
       - name: 🐳 Build & Push Docker Image
         run: |
-          docker build -t joon97/ticket-front:latest -f Dockerfile .
+          docker build -t joon97/ticket-front:${SHORT_SHA} -t joon97/ticket-front:latest .
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push joon97/ticket-front:${SHORT_SHA}
           docker push joon97/ticket-front:latest
+
+      - name: ✏️ Update deployment.yml image tag
+        run: |
+          sed -i "s|image: .*|image: joon97/ticket-front:${SHORT_SHA}|" frontend/k8s/deployment.yml
+
+      - name: 📤 Commit and Push updated deployment
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add frontend/k8s/deployment.yml
+          git commit -m "ci: update image tag to ${SHORT_SHA}" || echo "No changes to commit"
+          git push origin main
