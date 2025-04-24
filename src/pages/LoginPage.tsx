@@ -1,3 +1,5 @@
+// /api/users/login에서 userId를 넘겨주지 않아서 localStorage에 저장 불가능 -> api/users/{userId} 조회 불가능 : Undefined
+
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -18,13 +20,20 @@ function LoginPage() {
         password,
       });
 
+      //  토큰 추출
       const token = response.headers["authorization"]?.replace("Bearer ", "");
       if (!token) throw new Error("토큰 없음");
 
-      localStorage.setItem("accessToken", token);
+      console.log("로그인 응답 데이터:", response.data);
+      // 응답 body에서 userId 추출
+      const userId = response.data.userId; // 또는 response.data.data.userId 구조일 수도 있어
 
-      // 🔥 여기 핵심!
-      navigate("/"); // 로그인 성공 시 MainPage로 이동
+      // 저장
+      localStorage.setItem("accessToken", token);
+      localStorage.setItem("userId", userId);
+
+
+      navigate("/main"); // 로그인 성공 시 MainPage로 이동
     } catch (err) {
       setError("로그인 실패! 이메일 또는 비밀번호를 확인해주세요.");
     }

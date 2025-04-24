@@ -13,16 +13,20 @@ import ShowSessionsPage from "./pages/ShowSessionPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import CreateShowPage from "./pages/CreateShowPage";
 import CreateSessionPage from "./pages/CreateSessionPage";
+import SignupPage from "./pages/SignupPage";
+import KakaoApprovePage from "./pages/KakkoApprovePage";
+
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
+      <Route path="/" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       {isAuthenticated ? (
         <>
-          <Route path="/" element={<MainPage />} />
+          <Route path="/main" element={<MainPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/shows" element={<ShowSelectionPage />} />
           <Route path="/shows/:id/payment" element={<PaymentPage />} />
@@ -31,6 +35,7 @@ function AppRoutes() {
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/admin/create-show" element={<CreateShowPage />} />
           <Route path="/admin/create-session/:showId" element={<CreateSessionPage />} />
+          <Route path="/kakao/approve/:paymentId" element={<KakaoApprovePage />} />
 
 
         </>

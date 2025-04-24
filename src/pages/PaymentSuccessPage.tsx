@@ -1,34 +1,60 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+interface Seat {
+    seatId: string;
+    seatCode: string;
+}
 
 function PaymentSuccessPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const seatCode = location.state?.seatCode || "선택한 좌석";
-  const amount = location.state?.paymentAmount || 0;
+    const [seats, setSeats] = useState<Seat[]>([]);
+    const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
-  return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-white px-4">
-      <h1 className="text-3xl font-bold text-green-600 mb-4">🎉 결제 완료!</h1>
-      <p className="text-gray-700 mb-2">
-        <strong>{seatCode}</strong> 좌석에 대해 <strong>{amount.toLocaleString()}원</strong> 결제가 완료되었습니다.
-      </p>
+    useEffect(() => {
+        const storedSeats = localStorage.getItem("selectedSeats");
+        const amount = localStorage.getItem("paymentAmount");
 
-      <div className="mt-6 space-x-4">
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          메인으로
-        </button>
-        <button
-          onClick={() => navigate("/profile")}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
-          내 정보 보기
-        </button>
-      </div>
-    </div>
-  );
+        if (storedSeats) {
+            setSeats(JSON.parse(storedSeats));
+        }
+
+        if (amount) {
+            setPaymentAmount(Number(amount));
+        }
+    }, []);
+
+    return (
+        <div className="p-6 max-w-2xl mx-auto text-center">
+            <h1 className="text-2xl font-bold mb-4 text-green-600">🎉 결제 완료!</h1>
+
+            <div className="text-left text-gray-700 mb-6">
+                <p>
+                    <strong>결제 금액:</strong> {paymentAmount.toLocaleString()}원
+                </p>
+                <p className="mt-2">
+                    <strong>예매한 좌석:</strong>
+                </p>
+                <ul className="list-disc ml-6">
+                    {seats.length > 0 ? (
+                        seats.map((seat, idx) => (
+                            <li key={seat.seatId}>
+                                좌석 코드: {seat.seatCode}
+                            </li>
+                        ))
+                    ) : (
+                        <li>좌석 정보 없음</li>
+                    )}
+                </ul>
+            </div>
+
+            <button
+                onClick={() => window.location.href = "/main"}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+                메인으로
+            </button>
+
+        </div>
+    );
 }
 
 export default PaymentSuccessPage;

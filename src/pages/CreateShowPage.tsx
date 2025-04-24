@@ -38,7 +38,7 @@ function CreateShowPage() {
             navigate(`/admin/create-session/${showId}`);
         } catch (err) {
             console.error("공연 등록 실패", err);
-            alert("공연 등록 실패 😢");
+            alert("공연 등록 실패 ");
         }
     };
 
@@ -62,6 +62,7 @@ function CreateShowPage() {
                 <input type="text" placeholder="아티스트" value={artist} onChange={(e) => setArtist(e.target.value)} className="w-full p-2 border rounded" required />
                 <input type="text" placeholder="포스터 이미지 URL" value={posterUrl} onChange={(e) => setPosterUrl(e.target.value)} className="w-full p-2 border rounded" />
                 <textarea placeholder="설명" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded" required />
+                <h3>- 티켓팅 날짜</h3>
                 <input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className="w-full p-2 border rounded" required />
                 <input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} className="w-full p-2 border rounded" required />
 

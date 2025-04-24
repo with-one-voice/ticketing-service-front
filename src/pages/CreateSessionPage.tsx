@@ -9,27 +9,31 @@ function CreateSessionPage() {
     const [sessionDate, setSessionDate] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
-    const [seatCount, setSeatCount] = useState(100);
+    const [seatCount, setSeatCount] = useState(10);
     const [seatPrice, setSeatPrice] = useState(50000);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await axiosInstance.post(`/sessions/${showId}`, {
-                sessionDate,
-                startTime,
-                endTime,
+            //  여기서 포맷 맞춰주기
+            const formattedStartTime = `${startTime}:00`; // "14:00" → "14:00:00"
+            const formattedEndTime = `${endTime}:00`;
+
+            await axiosInstance.post(`/shows/sessions/${showId}`, {
+                sessionDate, // 이미 YYYY-MM-DD 형식
+                startTime: formattedStartTime,
+                endTime: formattedEndTime,
                 seatCount,
                 seatPrice,
             });
+
             alert("회차 등록 완료!");
-            navigate("/shows"); // 또는 공연 상세로
+            navigate("/shows");
         } catch (err) {
             console.error("회차 등록 실패", err);
             alert("실패!");
         }
     };
-
     return (
         <div className="p-6 max-w-lg mx-auto">
             <h1 className="text-xl font-bold mb-4">공연 회차 등록</h1>

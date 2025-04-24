@@ -1,106 +1,111 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { useAuth } from "../contexts/AuthContext";
-import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../apis/axiosInstance";
 
 interface Seat {
-  seatId: string;
-  seatCode: string;
-  status: "AVAILABLE" | "HOLD" | "RESERVED";
-  price: number;
+    seatId: string;
+    seatCode: string;
+    status: "AVAILABLE" | "HELD" | "RESERVED";
 }
 
 function SeatSelectionPage() {
-  const { accessToken } = useAuth();
-  const { showId } = useParams();
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get("sessionId");
-  const [seats, setSeats] = useState<Seat[]>([]);
-  const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  useEffect(() => {
-    if (!sessionId) return;
+    const sessionId = new URLSearchParams(location.search).get("sessionId");
+    const seatPrice = Number(new URLSearchParams(location.search).get("seatPrice"));
+    const userId = localStorage.getItem("userId");
 
-    const fetchSeats = async () => {
-      try {
-        const res = await axios.get(`http://localhost:8080/api/seats/${sessionId}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setSeats(res.data.result);
-      } catch (err) {
-        console.error("좌석 불러오기 실패", err);
-      }
+    const [seats, setSeats] = useState<Seat[]>([]);
+    const [selectedSeats, setSelectedSeats] = useState<Seat[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!sessionId) return;
+
+        axiosInstance
+            .get(`/seats/${sessionId}`)
+            .then((res) => setSeats(res.data.result))
+            .catch((err) => {
+                console.error("좌석 조회 실패", err);
+                alert("좌석을 불러오는 데 실패했습니다.");
+            });
+    }, [sessionId]);
+
+    const toggleSeat = (seat: Seat) => {
+        setSelectedSeats((prev) =>
+            prev.find((s) => s.seatId === seat.seatId)
+                ? prev.filter((s) => s.seatId !== seat.seatId)
+                : [...prev, seat]
+        );
     };
 
-    fetchSeats();
-  }, [accessToken, sessionId]);
+    const handleSubmit = async () => {
+        if (!userId || !sessionId || selectedSeats.length === 0) {
+            alert("정보가 부족하거나 선택된 좌석이 없습니다.");
+            return;
+        }
 
-  const handleSelect = (seatId: string) => {
-    setSelectedSeatId(seatId === selectedSeatId ? null : seatId);
-  };
+        setIsLoading(true);
 
-  const selectedSeat = seats.find((s) => s.seatId === selectedSeatId);
+        try {
+            const seatIds = selectedSeats.map((seat) => seat.seatId);
+            const totalPrice = seatPrice * seatIds.length;
 
-  const goToPayment = () => {
-    if (selectedSeatId && sessionId) {
-      navigate(
-        `/shows/${showId}/payment?sessionId=${sessionId}&seatId=${selectedSeatId}`,
-        { state: { seatCode: selectedSeat?.seatCode } }
-      );
-    }
-  };
+            const res = await axiosInstance.post("/tickets", {
+                userId,
+                sessionId,
+                seatIds,
+            });
 
-  return (
-    <div className="min-h-screen px-4 py-8 bg-white">
-      <h1 className="text-2xl font-bold text-center mb-6">좌석을 선택하세요</h1>
+            const ticketId = res.data.result.ticketId;
 
-      <div className="max-w-3xl mx-auto grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
-        {seats.map((seat) => {
-          const isSelected = seat.seatId === selectedSeatId;
+            // ✅ localStorage에 seatCode와 seatId 저장
+            localStorage.setItem("selectedSeats", JSON.stringify(selectedSeats));
+            localStorage.setItem("paymentAmount", totalPrice.toString());
 
-          const baseClass = "p-4 text-center rounded cursor-pointer border font-semibold";
-          const statusClass = {
-            AVAILABLE: "bg-green-100 hover:bg-green-200 text-green-700 border-green-300",
-            HOLD: "bg-yellow-100 text-yellow-700 border-yellow-300 cursor-not-allowed",
-            RESERVED: "bg-red-100 text-red-600 border-red-300 cursor-not-allowed",
-          }[seat.status];
+            alert("티켓이 생성되었습니다! 결제 페이지로 이동합니다.");
+            navigate(`/shows/${sessionId}/payment?ticketId=${ticketId}&paymentAmount=${totalPrice}`);
+        } catch (err) {
+            console.error("티켓 생성 실패", err);
+            alert("티켓 생성에 실패했습니다.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-          const selectedClass = isSelected ? "ring-2 ring-blue-500" : "";
-
-          return (
-            <div
-              key={seat.seatId}
-              className={`${baseClass} ${statusClass} ${selectedClass}`}
-              onClick={() => seat.status === "AVAILABLE" && handleSelect(seat.seatId)}
-            >
-              {seat.seatCode}
+    return (
+        <div className="p-6 max-w-3xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6">좌석 선택</h1>
+            <div className="grid grid-cols-5 gap-4 mb-6">
+                {seats.map((seat) => (
+                    <button
+                        key={seat.seatId}
+                        onClick={() => toggleSeat(seat)}
+                        disabled={seat.status !== "AVAILABLE"}
+                        className={`p-4 border rounded text-center ${
+                            selectedSeats.find((s) => s.seatId === seat.seatId)
+                                ? "bg-green-500 text-white"
+                                : seat.status !== "AVAILABLE"
+                                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                                    : "bg-white hover:bg-gray-100"
+                        }`}
+                    >
+                        {seat.seatCode}
+                    </button>
+                ))}
             </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-8 text-center">
-        {selectedSeat ? (
-          <>
-            <p className="text-lg text-blue-700 mb-4">
-              선택된 좌석: <strong>{selectedSeat.seatCode}</strong>
-            </p>
             <button
-              onClick={goToPayment}
-              className="px-6 py-2 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className={`w-full py-2 rounded text-white ${
+                    isLoading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+                }`}
             >
-              결제하러 가기
+                {isLoading ? "예매 중..." : "예매하기"}
             </button>
-          </>
-        ) : (
-          <p className="text-gray-500">좌석을 선택해주세요.</p>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
 
 export default SeatSelectionPage;
