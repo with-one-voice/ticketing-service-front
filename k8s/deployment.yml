@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: joon97/ticket-front:1877361
+          image: joon97/ticket-front:0ae38d2
           ports:
             - containerPort: 80
           imagePullPolicy: Always #일단 개발용으로 always
