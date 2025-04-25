@@ -20,7 +20,7 @@ function SignupPage() {
             });
 
             // 2. 회원가입 성공 → 로그인 요청
-            const loginResponse = await axiosInstance.post("http://localhost:8080/api/auth/login", {
+            const loginResponse = await axiosInstance.post("/auth/login", {
                 email,
                 password,
             });
@@ -38,6 +38,7 @@ function SignupPage() {
 
             // 4. 메인 페이지로 이동
             navigate("/main");
+
         } catch (err: any) {
             console.error("회원가입 or 로그인 실패", err);
             setError("회원가입 또는 자동 로그인에 실패했습니다. 다시 시도해주세요.");

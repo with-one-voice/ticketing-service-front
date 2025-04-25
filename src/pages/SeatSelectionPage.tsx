@@ -60,7 +60,7 @@ function SeatSelectionPage() {
 
             const ticketId = res.data.result.ticketId;
 
-            // ✅ localStorage에 seatCode와 seatId 저장
+            // localStorage에 seatCode와 seatId 저장
             localStorage.setItem("selectedSeats", JSON.stringify(selectedSeats));
             localStorage.setItem("paymentAmount", totalPrice.toString());
 
