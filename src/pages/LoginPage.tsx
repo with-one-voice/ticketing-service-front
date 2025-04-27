@@ -1,73 +1,91 @@
-// /api/users/login에서 userId를 넘겨주지 않아서 localStorage에 저장 불가능 -> api/users/{userId} 조회 불가능 : Undefined
 
 import { useState } from "react";
-import axiosInstance from "../apis/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../apis/axiosInstance";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await axiosInstance.post("/auth/login", {
-        email,
-        password,
-      });
+      // /auth/login/v2 호출
+      const res = await axiosInstance.post("/auth/login/v2", { email, password });
 
-      //  토큰 추출
-      const token = response.headers["authorization"]?.replace("Bearer ", "");
-      if (!token) throw new Error("토큰 없음");
+      // 응답 헤더에서 토큰 추출
+      const token = res.headers["authorization"]?.replace("Bearer ", "");
 
-      console.log("로그인 응답 데이터:", response.data);
-      // 응답 body에서 userId 추출
-      const userId = response.data.userId; // 또는 response.data.data.userId 구조일 수도 있어
+      // 응답 body(result)에서 userId 추출
+      const userId = res.data.result.userId;
 
-      // 저장
+      if (!token || !userId) {
+        throw new Error("로그인 응답에 필요한 정보가 없습니다.");
+      }
+
+      // 토큰과 유저ID를 localStorage에 저장
       localStorage.setItem("accessToken", token);
       localStorage.setItem("userId", userId);
 
+      // 로그인 성공하면 메인페이지로 이동
+      alert("로그인 성공!");
+      navigate("/main");
 
-      navigate("/main"); // 로그인 성공 시 MainPage로 이동
     } catch (err) {
-      setError("로그인 실패! 이메일 또는 비밀번호를 확인해주세요.");
+      console.error("로그인 실패", err);
+      setError("로그인에 실패했습니다. 이메일 또는 비밀번호를 다시 확인해주세요.");
     }
   };
 
   return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md w-full max-w-md">
-          <h2 className="text-xl font-bold text-center mb-4">로그인</h2>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md">
+          <h1 className="text-2xl font-bold mb-4 text-center">로그인</h1>
 
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-          <input
-              type="email"
-              placeholder="이메일"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded mb-3"
-              required
-          />
-          <input
-              type="password"
-              placeholder="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded mb-4"
-              required
-          />
+          <label className="block mb-2">
+            이메일
+            <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mt-1 p-2 border rounded"
+                required
+            />
+          </label>
+
+          <label className="block mb-4">
+            비밀번호
+            <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mt-1 p-2 border rounded"
+                required
+            />
+          </label>
+
           <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
           >
             로그인
           </button>
+
+          <p className="text-sm text-center mt-4">
+            아직 회원이 아니신가요?{" "}
+            <span
+                className="text-blue-600 hover:underline cursor-pointer"
+                onClick={() => navigate("/signup")}
+            >
+            회원가입
+          </span>
+          </p>
         </form>
       </div>
   );
