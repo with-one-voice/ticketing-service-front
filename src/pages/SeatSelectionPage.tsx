@@ -85,10 +85,16 @@ function SeatSelectionPage() {
                         disabled={seat.status !== "AVAILABLE"}
                         className={`p-4 border rounded text-center ${
                             selectedSeats.find((s) => s.seatId === seat.seatId)
-                                ? "bg-green-500 text-white"
-                                : seat.status !== "AVAILABLE"
-                                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                                    : "bg-white hover:bg-gray-100"
+                                // ? "bg-green-500 text-white"
+                                // : seat.status !== "AVAILABLE"
+                                //     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                                //     : "bg-white hover:bg-gray-100"
+                                ? "bg-green-500 text-white" // 내가 선택한 좌석
+                                : seat.status === "AVAILABLE" 
+                                    ? "bg-white hover:bg-gray-100" // 예약 가능
+                                    : seat.status === "HELD"
+                                        ? "bg-yellow-300 text-black cursor-not-allowed" // 선점 중
+                                        : "bg-gray-400 text-white cursor-not-allowed" // 예약 완료
                         }`}
                     >
                         {seat.seatCode}
