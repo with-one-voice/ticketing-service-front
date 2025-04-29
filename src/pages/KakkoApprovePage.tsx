@@ -51,11 +51,7 @@ function KakaoApprovePage() {
         const ticketId = localStorage.getItem("ticketId");
         const paymentAmount = localStorage.getItem("paymentAmount");
 
-        if (!paymentId || !pgToken || !ticketId || !paymentAmount) {
-            alert("필수 정보가 누락되었습니다.");
-            navigate("/main");
-            return;
-        }
+
 
         // 백엔드 REST 승인 API 호출
         axiosInstance
