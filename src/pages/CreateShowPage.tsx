@@ -12,6 +12,7 @@ function CreateShowPage() {
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
     const navigate = useNavigate();
+    const [category, setCategory] = useState("CONCERT");
 
     useEffect(() => {
         axiosInstance.get("/venues")
@@ -28,7 +29,7 @@ function CreateShowPage() {
                 artist,
                 posterUrl,
                 description,
-                category: "CONCERT",
+                category,
                 ticketingStartTime: start,
                 ticketingEndTime: end,
             });
@@ -57,8 +58,19 @@ function CreateShowPage() {
                         <option key={v.venueId} value={v.venueId}>{v.name}</option>
                     ))}
                 </select>
-
+                <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                    className="w-full p-2 border rounded"
+                >
+                    <option value="CONCERT">콘서트</option>
+                    <option value="MUSICAL">뮤지컬</option>
+                    <option value="THEATER">연극</option>
+                    <option value="FESTIVAL">페스티벌</option>
+                </select>
                 <input type="text" placeholder="공연 제목" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 border rounded" required />
+
                 <input type="text" placeholder="아티스트" value={artist} onChange={(e) => setArtist(e.target.value)} className="w-full p-2 border rounded" required />
                 <input type="text" placeholder="포스터 이미지 URL" value={posterUrl} onChange={(e) => setPosterUrl(e.target.value)} className="w-full p-2 border rounded" />
                 <textarea placeholder="설명" value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-2 border rounded" required />
