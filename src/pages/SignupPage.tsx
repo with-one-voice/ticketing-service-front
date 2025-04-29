@@ -85,7 +85,7 @@ function SignupPage() {
                     이미 계정이 있으신가요?{" "}
                     <span
                         className="text-blue-600 hover:underline cursor-pointer"
-                        onClick={() => navigate("/login")}
+                        onClick={() => navigate("/")}
                     >
             로그인
           </span>

@@ -22,8 +22,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       {isAuthenticated ? (
         <>
           <Route path="/main" element={<MainPage />} />
